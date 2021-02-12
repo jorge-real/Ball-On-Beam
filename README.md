@@ -27,11 +27,11 @@ By default, the simulator is passive: it does not make simulation steps by itsel
 
 The images below show the GUI simulator running an open-loop and a closed-loop test program.
 
-![Free fall](free-fall.png)
+![Free fall](free_fall.png)
 
 Simulator GUI while running the program Free_Fall (see code below).
 
-![PD Control](pd-control.png)
+![PD Control](pd_control.png)
 
 Simulator GUI while running a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.
 
