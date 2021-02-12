@@ -34,20 +34,20 @@ In the following:
   - <GNAT_DIR> is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
   - <RTS_DIR> depends on your platform:
   
-    On Linux: "lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/"
+    - On Linux: "lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/"
     
-    On macOS: "lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/"
+    - On macOS: "lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/"
     
-  * Step 0
+  - Step 0
   Depending on your permissions on the GNAT installation folders, you may need to "sudo su" (or get the needed permissions) before you take the following steps.
 
-  * Step 1
+  - Step 1
   Open the source file "<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb" in a text editor. Find the declaration of constant Period in line 101 of that file and change it to: "Period : constant Time_Span := Milliseconds (1);". Then save and close the file.
     
-  * Step 2
+  - Step 2
   Make sure your PATH variable is conveniently preceded by <GNAT_DIR>/bin.
 
-  * Step 3
+  - Step 3
   Change to the appropriate folder and recompile the runtime:
 
     cd <GNAT_DIR>/<RTS_DIR>/adalib
