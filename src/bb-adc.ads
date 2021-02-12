@@ -1,23 +1,23 @@
-----------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 --                                                                            --
---                        B A L L _ O N _ B E A M _ A D C                     --
+--                                  B B . A D C                               --
 --                                                                            --
 --                                     Spec                                   --
 --                                                                            --
+--                                                                            --
+--                                                                            --
+--  This package implements an A/D converter interface with a ball position   --
+--  sensor, instead of the "ideal" results produced by function Ball_Position --
+--  of package BB.Ideal.                                                      --
+--  Instead of the exact ball position, the ADC converter returns a 12-bit    --
+--  A/D conversion that needs be scaled to give a position value in mm. The   --
+--  conversion has gaussian random noise added to better emulate reality and  --
+--  to motivate the use of some form of filtering.                            --
 --                                                                            --
 --  Author: Jorge Real                                                        --
 --  Universitat Politecnica de Valencia                                       --
 --  December, 2020 - Version 1                                                --
 --  February, 2021 - Version 2                                                --
---                                                                            --
---                                                                            --
---  This package implements an A/D converter interface with the position      --
---  sensor of package Ball_On_Beam_Simulator, instead of the "ideal" results  --
---  produced by function Ball_Position of that package.                       --
---  The ADC converter transforms the result of Ball_Position into a 12-bit    --
---  conversion. The conversion has some random noise added, with gaussian     --
---  distribution to better emulate reality and to motivate the need for using --
---  some form of filtering.                                                   --
 --                                                                            --
 --------------------------------------------------------------------------------
 

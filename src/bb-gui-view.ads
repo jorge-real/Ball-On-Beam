@@ -3,7 +3,7 @@
 --                                                        --
 --                         Spec                           --
 --                                                        --
---  "View" package of Ball on Beam simulator GUI.         --
+--  "View" package of BB.GUI.                             --
 --                                                        --
 --  Author: Jorge Real                                    --
 --  Universitat Politecnica de Valencia                   --

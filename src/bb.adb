@@ -17,7 +17,7 @@
 --    with'ed, together with package BB. These packages present different     --
 --    abstractions for the purpose, such as an ADC device to obtain the ball  --
 --    position. The same goes for the gnoga-based graphical user interface,   --
---    which is implemented in child package BB.GUI and childs of it.          --
+--    which is implemented in child package BB.GUI and its child units.       --
 --                                                                            --
 --  Author: Jorge Real                                                        --
 --  Universitat Politecnica de Valencia                                       --

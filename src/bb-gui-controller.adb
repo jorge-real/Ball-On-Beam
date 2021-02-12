@@ -3,7 +3,7 @@
 --                                                        --
 --                         Body                           --
 --                                                        --
---  "Controller" package of Ball on Beam simulator GUI.   --                                                        --                                                        --
+--  "Controller" package of BB.GUI.                       --                                                        --                                                        --
 --                                                        --
 --  Author: Jorge Real                                    --
 --  Universitat Politecnica de Valencia                   --
