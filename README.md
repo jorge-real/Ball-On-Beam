@@ -54,7 +54,9 @@ In the following:
   - **Step 1.**
   Open the source file *<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb* in a text editor. Find the declaration of constant Period in line 101 of that file and change it to:
   
-  ```Ada Period : constant Time_Span := Milliseconds (1);```
+  ```Ada
+  Period : constant Time_Span := Milliseconds (1);
+  ```
   
   Then save and close the file.
     
@@ -64,10 +66,10 @@ In the following:
   - **Step 3.**
   Change to the appropriate folder and recompile the runtime:
 
-```bash
+   ```bash
     cd <GNAT_DIR>/<RTS_DIR>/adalib
     make -f Makefile.adalib ROOT=<GNAT_DIR>
-```
+   ```
 You should now be able to use the modified runtime.
 Note that this procedure modifies your Ada runtime. If you want to preserve it, you can apply these steps to a duplicate of your runtime. However, note that the change to the source code proposed here is minimal and reversible.  
 
