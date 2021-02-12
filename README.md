@@ -25,15 +25,13 @@ The system can be simulated on one of a selection of solar system objects, to tr
 
 By default, the simulator is passive: it does not make simulation steps by itself. The ball position is only re-calculated when (i) the beam angle is set or (ii) the ball position is read. As a consequence, an open-loop application (e.g. Fee_Fall in the example below) will not change the simulator state and the GUI will fail to show the ball position changing. This is not a problem with closed-loop applications, because they set the angle and read the position frequently; but for open-loop uses, package BB gives support for changing this default and setting the simulator operating mode to Open_Loop, in which the simulator automatically re-calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).  
 
-The images below show the GUI simulator running an open-loop and a closed-loop test program. In the first one, corresponds to the execution of the open-loop application Free_Fall (see code below, in Sec. *A simple example*).
+The images below are screenshots of the simulator GUI while running an open-loop and a closed-loop program. The first one corresponds to the execution of the open-loop application Free_Fall (see code below, in Sec. *A simple example*).
 
 ![Free fall](free_fall.png)
 
-
+The second screenshot was taken during the execution of a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.
 
 ![PD Control](pd_control.png)
-
-Simulator GUI while running a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.
 
 ## GNAT Runtime and the ADC interface
 Package BB.ADC has runtime requirements that are not met by default in the GNAT runtimes where this project has been tested. In particular, BB.ADC uses timing events (TEs) with expiration times as short as 2 ms. In the native GNAT CE 2019 distributions for Linux, Windows and macOS, the default TE granularity is 100 ms. Using these runtimes with no mofication, the effective conversion delay of the ADC would be slightly above 100 ms, which imposes too large control periods.
