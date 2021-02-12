@@ -19,12 +19,6 @@
 --  distribution to better emulate reality and to motivate the need for using --
 --  some form of filtering.                                                   --
 --                                                                            --
---  This is free software in the ample sense:                                 --
---  you can use it freely, provided you preserve                              --
---  this comment at the header of source files                                --
---  and you clearly indicate the changes made to                              --
---  the original file, if any.                                                --
---                                                                            --
 --------------------------------------------------------------------------------
 
 package BB.ADC is

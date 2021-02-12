@@ -3,18 +3,13 @@
 --                                                        --
 --                         Body                           --
 --                                                        --
---  "Controller" package of Ball on Beam simulator GUI.   --                                                        --
+--  "Controller" package of Ball on Beam simulator GUI.   --                                                        --                                                        --
 --                                                        --
 --  Author: Jorge Real                                    --
 --  Universitat Politecnica de Valencia                   --
---  July, 2020 - Version 1                                                    --
---  February, 2021 - Version 2                                                --
+--  July, 2020 - Version 1                                --
+--  February, 2021 - Version 2                            --
 --                                                        --
---  This is free software in the ample sense:             --
---  you can use it freely, provided you preserve          --
---  this comment at the header of source files            --
---  and you clearly indicate the changes made to          --
---  the original file, if any.                            --
 ------------------------------------------------------------
 
 with BB.GUI.View;
