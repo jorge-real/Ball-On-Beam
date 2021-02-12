@@ -104,7 +104,7 @@ The following example program moves the BB system to all objects defined in by t
 ```
 
 ## Is there a user manual?
-There is no user manual as such at the moment. Information on how to use the library is provided however in multiple code comments. In particular, spec files  contain detailed descriptions.
+There is no user manual as such at the moment. Information on how to use the library is provided however in multiple code comments. In particular, spec files  contain detailed descriptions. The aim is that these comments are sufficient to understand how to work with the library, but you are welcome to contact me if they are not for you...
 
 ##  Contact
 Feel free to contact me by email (jorge@disca.upv.es) if you need help with this library, or you want to drop a comment or suggestion.
