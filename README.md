@@ -67,11 +67,10 @@ The GUI packages depend on the gnoga library (https://github.com/alire-project/g
  
 Example
 -------
-The following example program moves the BB system to all objects defined in by type Solar_System_Object. On each objects, it alternates the beam angle between 2 deg and -2 deg every 2.5 s, letting the ball fall freely during that time. The program uses the Ideal interface and the GUI.
+The following example program moves the BB system to all objects defined in by type Solar_System_Object. On each object, it alternates the beam angle four times between 2 deg and -2 deg, once every 2.5 s, letting the ball fall freely during that time. A two-second pause is introduced before moving to the next solar system object. The program uses the Ideal interface and the GUI.
 
 
    with BB, BB.Ideal, BB.GUI;
-   
    use  BB, BB.Ideal, BB.GUI;
 
    procedure Free_Fall is
