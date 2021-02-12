@@ -25,11 +25,11 @@ The system can be simulated on one of a selection of solar system objects, to tr
 
 By default, the simulator is passive: it does not make simulation steps by itself. The ball position is only re-calculated when (i) the beam angle is set or (ii) the ball position is read. As a consequence, an open-loop application (e.g. Fee_Fall in the example below) will not change the simulator state and the GUI will fail to show the ball position changing. This is not a problem with closed-loop applications, because they set the angle and read the position frequently; but for open-loop uses, package BB gives support for changing this default and setting the simulator operating mode to Open_Loop, in which the simulator automatically re-calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).  
 
-The images below show the GUI simulator running an open-loop and a closed-loop test program.
+The images below show the GUI simulator running an open-loop and a closed-loop test program. In the first one, corresponds to the execution of the open-loop application Free_Fall (see code below, in Sec. *A simple example*).
 
 ![Free fall](free_fall.png)
 
-Simulator GUI while running the program Free_Fall (see code below).
+
 
 ![PD Control](pd_control.png)
 
