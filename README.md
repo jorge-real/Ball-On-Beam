@@ -1,9 +1,10 @@
 # Ball-On-Beam library
 # Simulator of a ball on beam system
 
-
 ## General description
-This project implements a simulator library for a ball on beam system. The simulated system is formed by:
+This project implements a simulator library for a ball on beam system. The aim is to serve as a virtual platform for teaching or just experimenting control systems programmed in Ada. The main motivation for writing this library is academic: the covid-19 pandemic has made it impossible for my students to attend the Real-Time Systems lab physically, so we have not had access to the hardware devices we use in the course. This simulator has made it possible to develop new contents for the course that all students have been able to work on from their homes, with no need for specific hardware. Although a simulator will never be like working with the real hardware, an effort has been made to reproduce real-life phenomenon, such as ADC measurement noise that you need to filter for more precise and smoother control.
+
+The simulated system is formed by:
 
  - A 480 mm beam, whose inclination angle can be set between -15 deg and 15 deg. At angle 0 deg, the beam is horizontal.
  - A ball that moves along the beam, subject to the acceleration of gravity depending on the beam inclination.
@@ -103,7 +104,7 @@ The following example program moves the BB system to all objects defined in by t
 ```
 
 ## Is there a user manual?
-There is no user manual as such for this simulator, at least not yet. However, the code is widely commented. In particular, spec files contain detailed description of the interface procedures and types.
+There is no user manual as such at the moment. Information on how to use the library is provided however in multiple code comments. In particular, spec files  contain detailed descriptions.
 
 ##  Contact
-Feel free to contact me by email (jorge@disca.upv.es) if you need further help with this library, or you want to drop a comment or suggestion.
+Feel free to contact me by email (jorge@disca.upv.es) if you need help with this library, or you want to drop a comment or suggestion.
