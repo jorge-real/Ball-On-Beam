@@ -39,18 +39,16 @@ There is a way around this problem: move the system to a low-gravity solar syste
 In the following:
   - <GNAT_DIR> is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
   - <RTS_DIR> depends on your platform:
+  
     On Linux: "lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/"
+    
     On macOS: "lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/"
     
   - Step 0
   Depending on your permissions on the GNAT installation folders, you may need to "sudo su" (or get the needed permissions) before you take the following steps.
 
   - Step 1
-  Open the source file "<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb" in a text editor. Find the declaration of constant Period in line 101 of that file and change it to: 
-
-    Period : constant Time_Span := Milliseconds (1);
-    
-  Then save and close the file.
+  Open the source file "<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb" in a text editor. Find the declaration of constant Period in line 101 of that file and change it to: "Period : constant Time_Span := Milliseconds (1);". Then save and close the file.
     
   - Step 2
   Make sure your PATH variable is conveniently preceded by <GNAT_DIR>/bin.
@@ -71,35 +69,37 @@ Example
 -------
 The following example program moves the BB system to all objects defined in by type Solar_System_Object. On each objects, it alternates the beam angle between 2 deg and -2 deg every 2.5 s, letting the ball fall freely during that time. The program uses the Ideal interface and the GUI.
 
-with BB;       use BB;
-with BB.Ideal; use BB.Ideal;
-with BB.GUI;   use BB.GUI;
 
-procedure Free_Fall is
+   with BB, BB.Ideal, BB.GUI;
+   
+   use  BB, BB.Ideal, BB.GUI;
 
-begin
+   procedure Free_Fall is
 
-   Set_Simulation_Mode (Open_Loop);
+   begin
 
-   for Location in Solar_System_Object loop
+      Set_Simulation_Mode (Open_Loop);
 
-      Move_BB_To (Location);
+      for Location in Solar_System_Object loop
 
-      for I in 1 .. 2 loop
+         Move_BB_To (Location);
 
-         Set_Beam_Angle (2.0);
-         delay 2.5;
+         for I in 1 .. 2 loop
 
-         Set_Beam_Angle (-2.0);
-         delay 2.5;
+            Set_Beam_Angle (2.0);
+            delay 2.5;
+
+            Set_Beam_Angle (-2.0);
+            delay 2.5;
+
+         end loop;
+
+         delay 2.0;
 
       end loop;
 
-      delay 2.0;
+   end Free_Fall;
 
-   end loop;
-
-end Free_Fall;
 
 User manual?
 ------------
