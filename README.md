@@ -27,11 +27,13 @@ By default, the simulator is passive: it does not make simulation steps by itsel
 
 The images below show the GUI simulator running an open-loop and a closed-loop test program.
 
-![Simulator GUI while running the program Free_Fall (see code below)]
-(free-fall.png)
+![Free fall](free-fall.png)
 
-![Simulator GUI while running a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.]
-(pd-control.png)
+Simulator GUI while running the program Free_Fall (see code below).
+
+![PD Control](pd-control.png)
+
+Simulator GUI while running a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.
 
 ## GNAT Runtime and the ADC interface
 Package BB.ADC has runtime requirements that are not met by default in the GNAT runtimes where this project has been tested. In particular, BB.ADC uses timing events (TEs) with expiration times as short as 2 ms. In the native GNAT CE 2019 distributions for Linux, Windows and macOS, the default TE granularity is 100 ms. Using these runtimes with no mofication, the effective conversion delay of the ADC would be slightly above 100 ms, which imposes too large control periods.
