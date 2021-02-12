@@ -1,5 +1,5 @@
-# Ball-On-Beam library
-# Simulator of a ball on beam system
+# BB
+# A ball-on-beam system simulator
 
 ## General description
 This project implements a simulator library for a ball on beam system. The aim is to serve as a virtual platform for teaching or just experimenting control systems programmed in Ada. The main motivation for writing this library is academic: the covid-19 pandemic has made it impossible for my students to attend the Real-Time Systems lab physically, so we have not had access to the hardware devices we use in the course. This simulator has made it possible to develop new contents for the course that all students have been able to work on from their homes, with no need for specific hardware. Although a simulator will never be like working with the real hardware, an effort has been made to reproduce real-life phenomenon, such as ADC measurement noise that you need to filter for more precise and smoother control.
@@ -24,9 +24,9 @@ This hierarchy is complemented with a GUI, common to both interfaces, implemente
 
 The system can be simulated on one of a selection of solar system objects, to try different gravities. Package BB offers the needed interface for this purpose (type Solar_System_Object and procedure Move_BB_To).
 
-By default, the simulator is passive: it does not make simulation steps by itself. The ball position is only re-calculated when (i) the beam angle is set or (ii) the ball position is read. As a consequence, an open-loop application (e.g. Fee_Fall in the example below) will not change the simulator state and the GUI will fail to show the ball position changing. This is not a problem with closed-loop applications, because they set the angle and read the position frequently; but for open-loop uses, package BB gives support for changing this default and setting the simulator operating mode to Open_Loop, in which the simulator automatically re-calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).  
+By default, the simulator is passive: it does not make simulation steps by itself. The ball position is only re-calculated when (i) the beam angle is set or (ii) the ball position is read. As a consequence, an open-loop application (e.g. Fee\_Fall in the example below) will not change the simulator state and the GUI will fail to show the ball position changing. This is not a problem with closed-loop applications, because they set the angle and read the position frequently; but for open-loop uses, package BB gives support for changing this default and setting the simulator operating mode to Open_Loop, in which the simulator automatically re-calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).  
 
-The images below are screenshots of the simulator GUI while running an open-loop and a closed-loop program. The first one corresponds to the execution of the open-loop application Free_Fall (see code below, in Sec. *A simple example*).
+The images below are screenshots of the simulator GUI while running an open-loop and a closed-loop program. The first one corresponds to the execution of the open-loop application Free\_Fall (see code below, in Sec. *A simple example*).
 
 ![Free fall](free_fall.png)
 
@@ -40,37 +40,43 @@ Package BB.ADC has runtime requirements that are not met by default in the GNAT 
 There is a way around this problem: move the system to a low-gravity solar system object, where the control period can be larger (e.g. 250 ms) and the 100 ms conversion delay would be acceptable. However, if you want ADC conversions at the intended speed of 2 ms, you need to modify the GNAT CE runtime. In such case, you can follow the steps given below to modify the native Linux or macOS rutimes of GNAT CE 2019.
 
 In the following:
-  - *<GNAT_DIR>* is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
-  - *<RTS_DIR>* depends on your platform:
+
+  - *\<GNAT_DIR\>* is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
+  - *\<RTS_DIR\>* depends on your platform:
   
-    - On Linux: *lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/*
+    - On Linux: ```*lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/*```
     
-    - On macOS: *lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/*
+    - On macOS: ```*lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/*```
     
-  - **Step 0**
+  - **Step 0.**
   Depending on your permissions on the GNAT installation folders, you may need to "sudo su" (or get the needed permissions) before you take the following steps.
 
-  - **Step 1**
-  Open the source file *<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb* in a text editor. Find the declaration of constant Period in line 101 of that file and change it to: "Period : constant Time_Span := Milliseconds (1);". Then save and close the file.
+  - **Step 1.**
+  Open the source file *<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb* in a text editor. Find the declaration of constant Period in line 101 of that file and change it to:
+  
+  ```Ada Period : constant Time_Span := Milliseconds (1);```
+  
+  Then save and close the file.
     
-  - **Step 2**
-  Make sure your PATH variable is conveniently preceded by <GNAT_DIR>/bin.
+  - **Step 2.**
+  Make sure your PATH variable is conveniently prepended with *\<GNAT_DIR\>/bin*.
 
-  - **Step 3**
+  - **Step 3.**
   Change to the appropriate folder and recompile the runtime:
 
+```bash
     cd <GNAT_DIR>/<RTS_DIR>/adalib
     make -f Makefile.adalib ROOT=<GNAT_DIR>
-
+```
 You should now be able to use the modified runtime.
-Note that this procedure modifies your existing Ada runtime.  
+Note that this procedure modifies your Ada runtime. If you want to preserve it, you can apply these steps to a duplicate of your runtime. However, note that the change to the source code proposed here is minimal and reversible.  
 
 ##  Dependencies
-The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can use packages BB, BB.Ideal or BB.ADC without the GUI.
+The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all.
  
  
 ## A simple example
-The following example program moves the BB system to all objects defined in by type Solar_System_Object. On each object, it alternates the beam angle four times between 2 deg and -2 deg, once every 2.5 s, letting the ball fall freely during that time. A two-second pause is introduced before moving to the next solar system object. The program uses the Ideal interface and the GUI.
+The following example program moves the BB system to all objects defined by the enumeration type Solar_System_Object. On each object, it alternates the beam angle four times between 2 deg and -2 deg, once every 2.5 s, letting the ball fall freely during that time. A two-second pause is introduced before moving to the next solar system object. The program uses the Ideal interface and the GUI.
 
 ```Ada
     with BB, BB.Ideal, BB.GUI;
