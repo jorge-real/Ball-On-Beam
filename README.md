@@ -73,7 +73,7 @@ The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) l
 ## A simple example
 The following example program moves the BB system to all objects defined in by type Solar_System_Object. On each object, it alternates the beam angle four times between 2 deg and -2 deg, once every 2.5 s, letting the ball fall freely during that time. A two-second pause is introduced before moving to the next solar system object. The program uses the Ideal interface and the GUI.
 
-
+```Ada
     with BB, BB.Ideal, BB.GUI;
     use  BB, BB.Ideal, BB.GUI;
 
@@ -102,7 +102,7 @@ The following example program moves the BB system to all objects defined in by t
        end loop;
 
     end Free_Fall;
-
+```
 
 ## Is there a user manual?
 There is no user manual as such for this simulator, at least not yet. However, the code is widely commented. In particular, spec files contain detailed description of the interface procedures and types.
