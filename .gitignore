@@ -52,6 +52,6 @@ obj/csv_logs.adb.stdout
 obj/gpsauto.cgpr
 obj/main.adb.stderr
 obj/main.adb.stdout
-
+obj/
 # Mac stuff
 *.DS_Store
