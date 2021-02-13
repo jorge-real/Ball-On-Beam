@@ -47,6 +47,8 @@ obj/bb.ads.stderr
 obj/bb.ads.stdout
 obj/bb_common.ads.stderr
 obj/bb_common.ads.stdout
+obj/csv_logs.adb.stderr
+obj/csv_logs.adb.stdout
 obj/gpsauto.cgpr
 obj/main.adb.stderr
 obj/main.adb.stdout
