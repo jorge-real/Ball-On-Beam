@@ -17,12 +17,16 @@
 --    with'ed, together with package BB. These packages present different     --
 --    abstractions for the purpose, such as an ADC device to obtain the ball  --
 --    position. The same goes for the gnoga-based graphical user interface,   --
---    which is implemented in child package BB.GUI and its child units.       --
+--    which is implemented in child package BB.GUI and childs of it.          --
 --                                                                            --
 --  Author: Jorge Real                                                        --
 --  Universitat Politecnica de Valencia                                       --
 --  July, 2020 - Version 1                                                    --
 --  February, 2021 - Version 2                                                --
+--                                                                            --
+--  This is free software in the ample sense: you can use it freely,          --
+--    provided you preserve this comment at the header of source files and    --
+--    you clearly indicate the changes made to the original file, if any.     --
 --                                                                            --
 --------------------------------------------------------------------------------
 

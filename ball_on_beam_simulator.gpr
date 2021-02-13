@@ -1,4 +1,6 @@
-with "../gnoga/src/gnoga.gpr";  --  Use location of gnoga project file
+
+with "/Users/jorge/opt/gnoga/src/gnoga.gpr";
+--  Use location of YOUR gnoga.gpr project file
 
 library project Ball_On_Beam_Simulator is
 

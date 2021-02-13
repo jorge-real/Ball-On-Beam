@@ -1,8 +1,23 @@
 --------------------------------------------------------------------------------
 --                                                                            --
---                                 B B . A D C                                --
+--                        B A L L _ O N _ B E A M _ A D C                     --
 --                                                                            --
 --                                     Body                                   --
+--                                                                            --
+--  This package implements an A/D converter interface with a position sensor --
+--    sensor of package Ball_On_Beam_Simulator, instead of the "ideal" results  --
+--  produced by function Ball_Position of that BB.Ideal.                       --
+--  The ADC converter transforms the result of Ball_Position into a 12-bit    --
+--  conversion. The conversion has some random noise added, with gaussian     --
+--  distribution to better emulate reality and to motivate the need for using --
+--  some form of filtering.                                                   --
+--
+--                                                                            --
+--  Author: Jorge Real                                                        --
+--  Universitat Politecnica de Valencia                                       --
+--  December, 2020 - Version 1                                                --
+--  February, 2021 - Version 2                                                --
+--                                                                            --
 --                                                                            --
 --  This package implements an A/D converter interface with the position      --
 --  sensor of package Ball_On_Beam_Simulator, instead of the "ideal" results  --
@@ -12,10 +27,11 @@
 --  distribution to better emulate reality and to motivate the need for using --
 --  some form of filtering.                                                   --
 --                                                                            --
---  Author: Jorge Real                                                        --
---  Universitat Politecnica de Valencia                                       --
---  December, 2020 - Version 1                                                --
---  February, 2021 - Version 2                                                --
+--  This is free software in the ample sense:                                 --
+--  you can use it freely, provided you preserve                              --
+--  this comment at the header of source files                                --
+--  and you clearly indicate the changes made to                              --
+--  the original file, if any.                                                --
 --                                                                            --
 --------------------------------------------------------------------------------
 
