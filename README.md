@@ -74,8 +74,13 @@ You should now be able to use the modified runtime.
 Note that this procedure modifies your Ada runtime. If you want to preserve it, you can apply these steps to a duplicate of your runtime. However, note that the change to the source code proposed here is minimal and reversible.  
 
 ##  Dependencies
-The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all.
+The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
+
+##  Data logging utility
+Even if you don't use the GUI, you can do *a posteriori* data logging and analysis. In folder```utils``` you can find package CSV\_Logs that facilitates data logging to standard output or to a CSV file. The figure shows a plot obtained from a log file generated with this package. This experiment, in particular, uses the ADC interface to the ball and beam system. It shows the raw ADC position values and the filtered values as well. You can select how many Float values you want to log.
  
+![Free fall](pd-step-response.png)
+
  
 ## A simple example
 The following example program moves the BB system to all objects defined by the enumeration type Solar_System_Object. On each object, it alternates the beam angle four times between 2 deg and -2 deg, once every 2.5 s, letting the ball fall freely during that time. A two-second pause is introduced before moving to the next solar system object. The program uses the Ideal interface and the GUI.
