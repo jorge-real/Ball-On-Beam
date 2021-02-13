@@ -4,7 +4,7 @@ library project Ball_On_Beam_Simulator is
 
    for Languages use ("Ada");
    for Library_Name use "Ball_On_Beam_Simulator_Lib";
-   for Source_Dirs use ("src");
+   for Source_Dirs use ("src", "utils");
    for Object_Dir use "obj";
    for Library_Dir use "lib";
 
