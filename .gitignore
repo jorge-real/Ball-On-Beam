@@ -3,7 +3,7 @@
 
 # Ada Library Information
 *.ali
-<<<<<<< HEAD
+
 lib/libBall_On_Beam_Simulator_Lib.a
 obj/ball_on_beam_adc.adb.stderr
 obj/ball_on_beam_adc.adb.stdout
@@ -47,12 +47,11 @@ obj/bb.ads.stderr
 obj/bb.ads.stdout
 obj/bb_common.ads.stderr
 obj/bb_common.ads.stdout
+obj/csv_logs.adb.stderr
+obj/csv_logs.adb.stdout
 obj/gpsauto.cgpr
 obj/main.adb.stderr
 obj/main.adb.stdout
-=======
-
+obj/
 # Mac stuff
 *.DS_Store
->>>>>>> 1dcac02f6cf6122d87f2a1c775bd299102aa3fce
-.DS_Store
