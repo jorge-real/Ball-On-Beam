@@ -44,9 +44,9 @@ In the following:
   - *\<GNAT_DIR\>* is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
   - *\<RTS_DIR\>* depends on your platform:
   
-    - On Linux: ```*lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/*```
+    - On Linux: ```lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/```
     
-    - On macOS: ```*lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/*```
+    - On macOS: ```lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/```
     
   - **Step 0.**
   Depending on your permissions on the GNAT installation folders, you may need to "sudo su" (or get the needed permissions) before you take the following steps.
