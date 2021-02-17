@@ -77,7 +77,7 @@ Note that this procedure modifies your Ada runtime. If you want to preserve it, 
 The GUI packages depend on the [gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
 
 ##  Data logging utility
-Even if you don't use the GUI, you can make *a posteriori* data analysis. Package CSV\_Logs, in folder```utils``` facilitates data logging to standard output or to a CSV file. The figure shows a plot obtained from a log file generated with this package. This control experiment in particular uses the ADC interface to the ball and beam system. It shows the raw ADC position values, the filtered position, the setpoint, and the beam angle applied from the control loop. With CSV\_Logs, you can log as many Float variables as your experiment needs.
+Even if you don't use the GUI, you can make *a posteriori* data analysis. Package CSV\_Logs, in folder```utils``` facilitates data logging to standard output or to a CSV file. The figure shows a plot obtained from a log file generated with this package. This control experiment in particular shows the response of a PD controller to an initial 100 mm step and then a 200 mm step at time 5 seconds. Since it uses the ADC interface to the ball and beam system, the raw position read from the ADC must be filtered to reduce noise. Some filtering is also applied to the output angle. The graph shows the raw and filtered position and angle values, as well as the setpoint. With CSV\_Logs, you log an unconstrained array of Floats with as many components as your experiment requires.
  
 ![Free fall](pd-step-response.png)
 
