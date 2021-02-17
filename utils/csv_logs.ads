@@ -29,12 +29,12 @@ package CSV_Logs is
    --
    --  For example, the code:
    --  
-   --     Open_Log_Session (File_Name => "data.csv");
-   --     Log_Text ("Data_1, Data_2, Data_3");
-   --     Log ((1 =>  0.0, 2 =>  0.0, 3 =>  0.0));
-   --     Log ((1 => -1.0, 2 => -1.0, 3 => -1.0));
-   --     Log ((1 =>  2.0, 2 =>  2.0, 3 =>  2.0));
-   --     Close_Log_Session;
+   --        Open_Log_Session (File_Name => "kk.csv");
+   --        Log_Text ("Data_1, Data_2, Data_3");
+   --        Log_Data (( 0.0,  0.0,  0.0));
+   --        Log_Data ((-1.0, -1.0, -1.0));
+   --        Log_Data (( 2.0,  2.0,  2.0));
+   --        Close_Log_Session;
    --
    --  produces the file "data.csv" with the following contents:
    --
@@ -43,7 +43,6 @@ package CSV_Logs is
    --  -1.00000, -1.00000, -1.00000
    --   2.00000,  2.00000,  2.00000
    --
-   --  
    
    procedure Open_Log_Session (File_Name : String := "");
    --  Start a log session. Set File_Name as the output file for the Log.
