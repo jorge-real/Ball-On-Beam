@@ -14,10 +14,6 @@
 -- Author: Jorge Real                                                         --
 -- February, 2021                                                             --
 --                                                                            --
---  This is free software in the ample sense: you can use it freely,          --
---    provided you preserve this comment at the header of source files and    --
---    you clearly indicate the changes made to the original file, if any.     --
---                                                                            --
 --------------------------------------------------------------------------------
 
 package CSV_Logs is

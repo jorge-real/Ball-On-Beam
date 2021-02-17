@@ -7,10 +7,6 @@
 -- Author: Jorge Real                                                         --
 -- February, 2021                                                             --
 --                                                                            --
---  This is free software in the ample sense: you can use it freely,          --
---    provided you preserve this comment at the header of source files and    --
---    you clearly indicate the changes made to the original file, if any.     --
---                                                                            --
 --------------------------------------------------------------------------------
 
 with Ada.Text_IO;
@@ -18,15 +14,15 @@ with Ada.Float_Text_IO;
 
 package body CSV_Logs is
    
-   A_Session_Is_Open   : Boolean := False;
+   A_Session_Is_Open : Boolean := False;
    
-   Writing_To_File : Boolean := False;
-
+   Writing_To_File   : Boolean := False;
+   
    --  The log file, if it is used
-   Log_File        : aliased Ada.Text_IO.File_Type;
+   Log_File    : aliased Ada.Text_IO.File_Type;
 
    --  The output file access. May access Log_File or Standard_Output
-   Output_File     : Ada.Text_IO.File_Access;
+   Output_File : Ada.Text_IO.File_Access;
    
    ------------------------
    --  Open_Log_Session  --
