@@ -12,11 +12,16 @@
 with Ada.Text_IO;
 with Ada.Float_Text_IO;
 
+with Ada.Strings.Unbounded;
+with Ada.Directories;
+
 package body CSV_Logs is
    
    A_Session_Is_Open : Boolean := False;
    
    Writing_To_File   : Boolean := False;
+   
+   Output_File_Name  : Ada.Strings.Unbounded.Unbounded_String;
    
    --  The log file, if it is used
    Log_File    : aliased Ada.Text_IO.File_Type;
@@ -28,7 +33,8 @@ package body CSV_Logs is
    --  Open_Log_Session  --
    ------------------------
    
-   procedure Open_Log_Session (File_Name : String := "") is            
+   procedure Open_Log_Session (File_Name : String := "") is 
+      use Ada.Strings.Unbounded;
    begin 
 
       if A_Session_Is_Open then
@@ -50,6 +56,9 @@ package body CSV_Logs is
          --  The output file is set to access the just created Log_File
          Output_File := Log_File'Access;
          
+         --  File name saved for the closing session message
+         Output_File_Name := To_Unbounded_String (File_Name);
+         
       else 
          
          Writing_To_File := False;
@@ -66,6 +75,8 @@ package body CSV_Logs is
    -------------------------
    
    procedure Close_Log_Session is
+      use Ada.Strings.Unbounded;
+      use Ada.Directories;
    begin
       
       if A_Session_Is_Open then
@@ -76,6 +87,10 @@ package body CSV_Logs is
             
             Ada.Text_IO.Close (Log_File);
             
+            --  File info message for every closed log session
+            Ada.Text_IO.Put_Line ("Logged data was saved to """ 
+                                  & Current_Directory & "/"
+                                  & To_String (Output_File_Name) & """");
          end if;
          
       end if;
