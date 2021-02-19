@@ -5,7 +5,7 @@
 *.ali
 
 # GPS editr temporary files
-\#*\#
+src/.\#*\#
 
 lib/libBall_On_Beam_Simulator_Lib.a
 obj/ball_on_beam_adc.adb.stderr
@@ -56,7 +56,6 @@ obj/gpsauto.cgpr
 obj/main.adb.stderr
 obj/main.adb.stdout
 obj/
+
 # Mac stuff
 *.DS_Store
-src/.#bb-ideal.adb#
-src/.#bb.adb#
