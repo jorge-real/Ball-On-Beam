@@ -4,6 +4,9 @@
 # Ada Library Information
 *.ali
 
+# GPS editr temporary files
+\#*\#
+
 lib/libBall_On_Beam_Simulator_Lib.a
 obj/ball_on_beam_adc.adb.stderr
 obj/ball_on_beam_adc.adb.stdout
