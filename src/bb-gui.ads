@@ -22,7 +22,7 @@ package BB.GUI is
    procedure GUI_Setpoint (Target_Pos : Position);
    --  Tell the current setpoint to the GUI (in control applications).
    --  The target position is plotted in the graph area of the animation, and
-   --    indicated by a marker drawn on the beam itselg. If this procedure is
+   --    indicated by a marker drawn on the beam itself. If this procedure is
    --    never called, the plotted setpoint value is always 0.0 and the target
    --    marker appears at the center of the beam.
 
