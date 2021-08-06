@@ -3,35 +3,33 @@
 _Jorge Real. Universitat Politècnica de València, Spain._
 
 ## General description
-This project implements a simulator for a ball on beam system. The aim is to serve as a virtual platform for teaching or just experimenting control systems programmed in Ada. The main motivation for writing this library is academic: the covid-19 pandemic has made it impossible for my students to attend the Real-Time Systems lab physically, so we have not had access to the hardware devices we use in the course. This simulator has made it possible to develop new contents for the course that all students have been able to work on from their homes, with no need for specific hardware. Although a simulator will never be like working with the real hardware, an effort has been made to reproduce real-life phenomenon, such as ADC measurement noise that you need to filter for more precise and smoother control.
+This project implements a simulator of a ball on beam system. The aim is to serve as a virtual platform for teaching or just experimenting control systems programmed in Ada. The main motivation for writing this library is academic: the covid-19 pandemic has made it impossible for my students to attend the Real-Time Systems lab physically, so we have not had access to the hardware devices we use in the course. This simulator has made it possible to develop new contents for the course that all students have been able to work on from their homes, with no need for specific hardware. Although a simulator will never be like working with the real hardware, an effort has been made to reproduce real-life phenomenon, such as ADC measurement noise that you need to filter for more precise and smoother control.
 
 The simulated system is formed by:
 
  - A 480 mm beam, whose inclination angle can be set between -15 deg and 15 deg. At angle 0 deg, the beam is horizontal.
  - A ball that moves along the beam, subject to the acceleration of gravity depending on the beam inclination.
  
-The system presents a single input to it (the beam angle) and gives a single output (the ball position). There are two versions of the simulator that can be used, depending on the I/O interface they provide.
-
-The simulator is essentially passive: it does not make simulation steps by itself
+The system presents a single input to it (the beam angle) and gives a single output (the ball position). 
 
 ## Simulator structure
 The simulator is implemented as a hierarchical library:
 
  * The root package, ```BB```, provides the common types and operations to both interfaces (see next). 
  * Package ```BB.Ideal``` provides an ideal model of the system, where the position returned by the interface is exact and changes to the beam inclination have immediate effect, with no delay.
- * Package ```BB.ADC``` keeps the ideal interface to set the beam angle, but it models a 12-bit A/D converter (ADC) connected to an analog sensor to dertermine the ball position. The simulated ADC accepts polling or interrupt-like synchronisation, and it also simulates real-life gaussian noise -- which gives plenty of room for experimenting with filters.
+ * Package ```BB.ADC``` keeps the ideal interface to set the beam angle, but it emulates a 12-bit A/D converter (ADC) connected to an analog sensor to dertermine the ball position. The simulated ADC accepts polling or interrupt synchronisation and it also simulates real-life gaussian noise -- which gives plenty of room for experimenting with filters.
  
-This hierarchy is complemented with a GUI, common to both interfaces, implemented by package ```BB.GUI``` and its child packages ```BB.GUI.View``` and ```BB.GUI.Controller```. The GUI is based on the [Gnoga](https://github.com/alire-project/gnoga) library. It uses an internet browser to display a graphical animation of the simulated system and a real-time plot of the ball position, side by side. For control applications, the GUI can also be instructed to plot the target position on the graph. The GUI presents a "play/pause" button to freeze or resume the position plot (the animation always goes on); and a "quit" button, to close the connection with the application and let it terminate. The GUI connects with URL _http://127.0.0.1:8080_.
+This hierarchy is complemented with a GUI, common to both interfaces, implemented by package ```BB.GUI``` and its child packages ```BB.GUI.View``` and ```BB.GUI.Controller```. The GUI is based on the [Gnoga](https://github.com/alire-project/gnoga) library. It uses a native Gtk window to display a graphical animation of the simulated system and a real-time plot of the ball position, side by side. For control applications, the GUI can also be instructed to plot the target position on the graph. The GUI presents a "play/pause" button to freeze or resume the position plot (the animation always goes on); and a "quit" button, to close the connection with the application and let it terminate. 
 
 The system can be simulated on one of a selection of solar system objects, to try different gravities. Package BB offers the needed interface for this purpose (type Solar_System_Object and procedure Move_BB_To).
 
-By default, the simulator is passive: it does not make simulation steps by itself. The ball position is only re-calculated when (i) the beam angle is set or (ii) the ball position is read. As a consequence, an open-loop application (e.g. Fee\_Fall in the example below) will not change the simulator state and the GUI will fail to show the ball position changing. This is not a problem with closed-loop applications, because they set the angle and read the position frequently; but for open-loop uses, package BB gives support for changing this default and setting the simulator operating mode to Open_Loop, in which the simulator automatically re-calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).  
+By default, the simulator is passive: it does not make simulation steps by itself; instead, the ball position is only re-calculated (i) when the beam angle is set, or (ii) when the ball position is read. This is fine for control applications, because they need to set the beam angle and read the ball position frequently enough and the GUI can show progress. For open loop applications, the operating mode must be set to Open_Loop, so that the simulator becomes active and calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).
 
 The images below are screenshots of the simulator GUI while running an open-loop and a closed-loop program. The first one corresponds to the execution of the open-loop application Free\_Fall (see code below, in Section *A simple example*).
 
 ![Free fall](free_fall.png)
 
-The second screenshot was taken during the execution of a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the marker drawn on the beam, reflecting the current setpoint.
+The second screenshot was taken during the execution of a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the yellow marker drawn on the beam, that indicates the current setpoint.
 
 ![PD Control](pd_control.png)
 
