@@ -86,7 +86,7 @@ Even if you don't use the GUI, you can make *a posteriori* data analysis. Packag
 
 This control experiment in particular shows the response of a PD controller to an initial 100 mm step and then a 200 mm step at time 5 seconds. Since it uses the ADC interface to the ball and beam system, the raw position read from the ADC must be filtered to reduce noise. Some filtering is also applied to the output angle. The graph shows the raw and filtered position and angle values, as well as the setpoint. With CSV\_Logs, you log an unconstrained array of Floats with as many components as your experiment requires.
  
-![Free fall](pd-step-response.png)
+![Step response](pd-step-response.png)
 
  
 ## A simple example
