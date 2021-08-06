@@ -29,6 +29,7 @@ with System;
 with Ada.Numerics.Elementary_Functions;
 
 with Ada.Real_Time;  use Ada.Real_Time;
+with Ada.Synchronous_Task_Control; use Ada.Synchronous_Task_Control;
 
 package body BB.GUI.Controller is
 
@@ -37,6 +38,8 @@ package body BB.GUI.Controller is
    
    Simulation_Running : Boolean := True;
    Updater_Terminated : Boolean := False;
+   
+   GUI_Is_Usable : Suspension_Object;
    
       --  GUI refresh period
    Updater_Period : constant Duration := 0.1;
@@ -84,7 +87,10 @@ package body BB.GUI.Controller is
    task body Updater is
       Next : Time := Clock;
       Refresh_Period : constant Time_Span := To_Time_Span (Updater_Period);
+
    begin
+      Suspend_Until_True (GUI_Is_Usable);
+      
       while Simulation_Running loop
          Next := Next + Refresh_Period;
          delay until Next;
@@ -163,14 +169,19 @@ package body BB.GUI.Controller is
    --  is larger than List_Length
    N_Plot_Points : Integer := 0;
    
-   --  X coordinate of target value when printed in the status area
+   --  X offset of target value printed in status line, wrt label "Target = "
    Target_Text_X_Offset : Integer;
+   --  Same for beam angle
+   Angle_Text_X_Offset : Integer;
+   --  Same for ball position
+   Pos_Text_X_Offset   : Integer;
    
    ------------------------
    --  Update_Animation  --
    ------------------------
    --  Updates the ball and beam animation. 
    --  If plot refresh is not paused, it also updates the plot
+   
    procedure Update_Animation 
      (Inclination : Angle;
       Ball_Pos    : Position;
@@ -184,7 +195,7 @@ package body BB.GUI.Controller is
       Aux_Angle : constant Integer := Integer (Inclination * 100.0);
       --  String that contains the integer part of Angle
       Angle_Int : constant String  := Integer'Image (Aux_Angle  /  100);
-      --  String that contains the decimal part of Angle, lead by a space
+      --  String that contains the decimal part of Angle, with a leading space
       Angle_Dec : constant String  := Integer'Image (Aux_Angle mod 100);
       --  String that represents the position in mm
       Pos_Str   : constant String  := Integer'Image (Integer (Ball_Pos));
@@ -244,14 +255,18 @@ package body BB.GUI.Controller is
       
       --  Update status info
       View.BB_Animation.Fill_Color ("Black");
+      --  Print angle value
       View.BB_Animation.Fill_Text 
         (Angle_Int & "." & 
            Angle_Dec (Angle_Dec'First + 1 .. Angle_Dec'Last) & 
-           " deg", 150 + 38, Canvas_Y_Size - 5);
+           " deg", 150 + Angle_Text_X_Offset, Canvas_Y_Size - 5);
+      --  Print ball position value
       View.BB_Animation.Fill_Text 
-        (Pos_Str & " mm", 270 + 47, Canvas_Y_Size - 5);
-      View.BB_Animation.Fill_Text
-        ("        ", (Canvas_X_Size / 2) - 20, 14);
+        (Pos_Str & 
+           " mm", 270 + Pos_Text_X_Offset, Canvas_Y_Size - 5);
+      --  Print SSO name
+--           View.BB_Animation.Fill_Text
+--             ("        ", (Canvas_X_Size / 2) - 20, 14);
       View.BB_Animation.Fill_Text
         (Current_Planet'Image, (Canvas_X_Size / 2) - 20, 14);
             
@@ -268,7 +283,7 @@ package body BB.GUI.Controller is
       --   ^_   -Mid     Negative  .   Positive     Mid  ^_
       --   | | /        positions  |   positions       \ | |
       --   | |/____________________.____________________\| |
-      --   |_______________________|_______________________| 
+      --   |_______________________+_______________________| 
       --   ^ -OBot                 ^                       ^ OBot
       --                     Pivot point (x0, y0)
       
@@ -344,12 +359,14 @@ package body BB.GUI.Controller is
          Target_Plot (N_Plot_Points) := Current_Target_Pos;
       
          --  Plot Position graph
-         --  Status area
+         --  Status line. Print target position
          View.BB_Pos_Graph.Fill_Color ("Black");
          View.BB_Pos_Graph.Fill_Text 
-           ((if Tgt_Str (Tgt_Str'First) = '-' then Tgt_Str 
-            else Tgt_Str (Tgt_Str'First + 1 .. Tgt_Str'Last)) & " mm", 
-            200 + Target_Text_X_Offset, Canvas_Y_Size - 5);
+           ((if Tgt_Str (Tgt_Str'First) = '-' then 
+               Tgt_Str 
+            else 
+               Tgt_Str (Tgt_Str'First + 1 .. Tgt_Str'Last)) & 
+              " mm", 200 + Target_Text_X_Offset, Canvas_Y_Size - 5);
       
          X_Plot_Offset := 0;
          View.BB_Pos_Graph.Stroke_Color ("Blue");
@@ -479,10 +496,8 @@ package body BB.GUI.Controller is
       --  Write status text at bottom of graph
       View.BB_Pos_Graph.Fill_Color ("Black");
       View.BB_Pos_Graph.Fill_Text ("Target = ", 200, Canvas_Y_Size - 5);
-      Target_Text_X_Offset := 40;
-      --  Instead of 40, the assignment should be:
-      --     := Integer (View.BB_Pos_Graph.Measure_Text_Width ("Target = "));
-      --  but it causes the exception Gnoga.Server.Connection.Connection_Error 
+      Target_Text_X_Offset := Integer 
+        (View.BB_Pos_Graph.Measure_Text_Width ("Target = "));
       
       --  Write units next to both axes
       View.BB_Pos_Graph.Fill_Text ("(mm)", 3, Canvas_Y_Size - 10);
@@ -527,11 +542,11 @@ package body BB.GUI.Controller is
       View.BB_Animation.Fill;
       View.BB_Animation.Stroke;
       
-      --  Ploace text labels
+      --  Place text labels
       View.BB_Animation.Fill_Color ("Black");
       View.BB_Animation.Fill_Text 
         ("Angle = ", 150, Canvas_Y_Size - 5);
-      View.BB_Animation.Fill_Text 
+            View.BB_Animation.Fill_Text 
         ("Position = ", 270, Canvas_Y_Size - 5);
 
       --  Copy background to Anim_Background image
@@ -541,6 +556,13 @@ package body BB.GUI.Controller is
          Top        => 0,
          Width      => Canvas_X_Size,
          Height     => Canvas_Y_Size);
+      
+      --  Measure X offsets for Angle and Pos values      
+      Angle_Text_X_Offset := 
+        Integer (View.BB_Animation.Measure_Text_Width ("Angle = "));
+      Pos_Text_X_Offset := 
+        Integer (View.BB_Animation.Measure_Text_Width ("Position = "));
+      
    end Draw_Animation_Background;
    
    -----------------
@@ -557,6 +579,8 @@ package body BB.GUI.Controller is
       --  Draw plot and animation background images and save them for future use
       Draw_Plot_Background;
       Draw_Animation_Background;
+      --  Signal the updater task that it can start using the GUI
+      Set_True (GUI_Is_Usable);
    end Create_GUI;
    
 end BB.GUI.Controller;
