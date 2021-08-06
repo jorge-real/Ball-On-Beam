@@ -7,8 +7,8 @@
 --                                                        --
 --  Author: Jorge Real                                    --
 --  Universitat Politecnica de Valencia                   --
---  July, 2020 - Version 1                                                    --
---  February, 2021 - Version 2                                                --
+--  July, 2020 - Version 1                                --
+--  February, 2021 - Version 2                            --
 --                                                        --
 --  This is free software in the ample sense:             --
 --  you can use it freely, provided you preserve          --
@@ -19,6 +19,10 @@
 
 with BB.GUI.Controller;
 with Gnoga.Application.Singleton;
+
+--  For use of a native GTk window for the GUI
+with Gnoga.Application.Gtk_Window;
+
 with Gnoga.Gui.Window;
 
 with Ada.Exceptions;
@@ -42,8 +46,19 @@ begin
    Gnoga.Application.Title ("Ball on Beam Simulator");
    Gnoga.Application.HTML_On_Close
      ("Connection to <b>Ball on Beam Simulator</b> has been terminated.");
-   Gnoga.Application.Open_URL ("http://127.0.0.1:8080");
-   Gnoga.Application.Singleton.Initialize (Main_Window, Port => 8080);
+
+   --  For native Gtk window:
+   --  First, use the proper initialize for a Gtk window
+   Gnoga.Application.Gtk_Window.Initialize (Port   => 8080,
+                                            Width  => 1050,
+                                            Height => 450);
+   --  And second, include Verbose parameter in the call
+   Gnoga.Application.Singleton.Initialize (Main_Window => Main_Window,
+                                           Verbose => False);
+
+   --  For browser window:
+   --  Gnoga.Application.Open_URL ("http://127.0.0.1:8080");
+   --  Gnoga.Application.Singleton.Initialize (Main_Window, Port => 8080);
 
    BB.GUI.Controller.Create_GUI (Main_Window);
 
