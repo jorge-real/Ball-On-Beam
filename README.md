@@ -2,6 +2,8 @@
 
 _Jorge Real. Universitat Politècnica de València, Spain._
 
+_Last modified on 14 November, 2022._
+
 ## General description
 This project implements a simulator of a ball on beam system. The aim is to serve as a virtual platform for teaching or just experimenting control systems programmed in Ada. The main motivation for writing this library is academic: the covid-19 pandemic has made it impossible for my students to attend the Real-Time Systems lab physically, so we have not had access to the hardware devices we use in the course. This simulator has made it possible to develop new contents for the course that all students have been able to work on from their homes, with no need for specific hardware. Although a simulator will never be like working with the real hardware, an effort has been made to reproduce real-life phenomenon, such as ADC measurement noise that you need to filter for more precise and smoother control.
 
@@ -19,61 +21,34 @@ The simulator is implemented as a hierarchical library:
  * Package ```BB.Ideal``` provides an ideal model of the system, where the position returned by the interface is exact and changes to the beam inclination have immediate effect, with no delay.
  * Package ```BB.ADC``` keeps the ideal interface to set the beam angle, but it emulates a 12-bit A/D converter (ADC) connected to an analog sensor to dertermine the ball position. The simulated ADC accepts polling or interrupt synchronisation and it also simulates real-life gaussian noise -- which gives plenty of room for experimenting with filters.
  
-This hierarchy is complemented with a GUI, common to both interfaces, implemented by package ```BB.GUI``` and its child packages ```BB.GUI.View``` and ```BB.GUI.Controller```. The GUI is based on the [Gnoga](https://github.com/alire-project/gnoga) library. It uses a native Gtk window to display a graphical animation of the simulated system and a real-time plot of the ball position, side by side. For control applications, the GUI can also be instructed to plot the target position on the graph. The GUI presents a "play/pause" button to freeze or resume the position plot (the animation always goes on); and a "quit" button, to close the connection with the application and let it terminate. 
+This hierarchy is complemented with a GUI, common to both interfaces, implemented by package ```BB.GUI``` and its child packages ```BB.GUI.View``` and ```BB.GUI.Controller```. The GUI is based on the [Gnoga](https://github.com/alire-project/gnoga) library. It uses a web browser to display a graphical animation of the simulated system and a real-time plot of the ball position, side by side. For control applications, the GUI can also be instructed to plot the target position on the graph. The GUI presents a "play/pause" button to freeze or resume the position plot (the animation always goes on); and a "quit" button, to close the connection with the application and let it terminate. 
 
-The system can be simulated on one of a selection of solar system objects, to try different gravities. Package BB offers the needed interface for this purpose (type Solar_System_Object and procedure Move_BB_To).
+The system can be simulated on one of a selection of solar system objects, to experiment with different gravities. Package BB offers the needed interface for this purpose (type Solar_System_Object and procedure Move_BB_To).
 
-By default, the simulator is passive: it does not make simulation steps by itself; instead, the ball position is only re-calculated (i) when the beam angle is set, or (ii) when the ball position is read. This is fine for control applications, because they need to set the beam angle and read the ball position frequently enough and the GUI can show progress. For open loop applications, the operating mode must be set to Open_Loop, so that the simulator becomes active and calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).
+By default, the simulator is passive: it does not make simulation steps by itself; instead, the ball position is only re-calculated (i) when the beam angle is set, or (ii) when the ball position is read. This is fine for control applications because they need to set the beam angle and read the ball position frequently enough and the GUI can show progress. For open loop applications, the operating mode must be set to Open_Loop, so that the simulator becomes active and calculates simulation steps at 10 Hz (coinciding with the refresh period of the GUI animation).
 
 The images below are screenshots of the simulator GUI while running an open-loop and a closed-loop program. The first one corresponds to the execution of the open-loop application Free\_Fall (see code below, in Section *A simple example*).
 
 ![Free fall](free_fall.png)
 
-The second screenshot was taken during the execution of a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the yellow marker drawn on the beam, that indicates the current setpoint.
+The second screenshot was taken during the execution of a proportional-derivative control loop. The image shows the controller reaction to a 200 mm step in the setpoint. Note the yellow marker drawn on the beam, which indicates the current setpoint.
 
 ![PD Control](pd_control.png)
 
 ## GNAT Runtime and the ADC interface
-Package ```BB.ADC``` has runtime requirements that are not met by default in the GNAT runtimes where this project has been tested. In particular, it uses timing events (TEs) with expiration times as short as 2 ms. In the native GNAT CE 2019 distributions for Linux, Windows and macOS, the default TE granularity is 100 ms. Using these runtimes with no mofication, the effective conversion delay of the ADC would be slightly above 100 ms, which imposes too large control periods.
+Package ```BB.ADC``` has runtime requirements that are not met by default in the GNAT runtimes where this project has been tested. In particular, it uses timing events (TEs) with expiration times as short as 2 ms. In current GNAT distributions for Linux, Windows and macOS, the default TE granularity is 100 ms. Using these runtimes with no modification, the effective conversion delay of the ADC would be slightly above 100 ms, which imposes too large control periods.
 
-There is a way around this problem: move the system to a low-gravity solar system object, where the control period can be larger (e.g. 250 ms) and the 100 ms conversion delay would be acceptable. However, if you want ADC conversions at the intended speed of 2 ms, you need to modify the GNAT CE runtime. In such case, you can follow the steps given below to modify the native Linux or macOS rutimes of GNAT CE 2019.
+A way around this problem is to move the system to a low-gravity solar system object, where the control period can be larger (e.g. 250 ms) and the 100 ms conversion delay would be acceptable. 
 
-In the following:
+However, if you want ADC conversions at the intended delay of 2 ms, you need to modify the GNAT runtime. The modification consists in changing the declaration of constant ```Period``` in file *a-rttiev.adb* to make it:
 
-  - *\<GNAT_DIR\>* is your GNAT CE 2019 installation folder (i.e., where the bin/ folder is located, containing gnatmake, gcc, etc.)
-  - *\<RTS_DIR\>* depends on your platform:
-  
-    - On Linux: ```lib/gcc/x86_64-pc-linux-gnu/8.3.1/rts-native/```
-    
-    - On macOS: ```lib/gcc/x86_64-apple-darwin17.7.0/8.3.1/rts-native/```
-    
-  - **Step 0.**
-  Depending on your permissions on the GNAT installation folders, you may need to "sudo su" (or get the needed permissions) before you take the following steps.
-
-  - **Step 1.**
-  Open the source file *\<GNAT_DIR>/<RTS_DIR>/adainclude/a-rttiev.adb* in a text editor. Find the declaration of constant Period in line 101 of that file and change it to:
-  
   ```Ada
   Period : constant Time_Span := Milliseconds (1);
   ```
+How to recompile your runtime depends on the toolchain and version you are using. There are project files for that in the GNAT Community Edition versions.  For FSF distributions, see the [GCC installation instructions](https://gcc.gnu.org/install).
   
-  Then save and close the file.
-    
-  - **Step 2.**
-  Make sure your PATH variable is conveniently prepended with *\<GNAT_DIR\>/bin*.
-
-  - **Step 3.**
-  Change to the appropriate folder and recompile the runtime:
-
-   ```bash
-    cd <GNAT_DIR>/<RTS_DIR>/adalib
-    make -f Makefile.adalib ROOT=<GNAT_DIR>
-   ```
-You should now be able to use the modified runtime.
-Note that this procedure modifies your Ada runtime. If you want to preserve it, you can apply these steps to a duplicate of your runtime. However, note that the change to the source code proposed here is minimal and reversible.  
-
 ##  Dependencies
-The GUI packages depend on the [Gnoga](https://github.com/alire-project/gnoga) library. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
+The GUI packages depend on the [Gnoga](https://github.com/alire-project/gnoga) library version 2. As of today. the latest Gnoga version used by ```BB``` is 2.1a. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
 
 The project file ```ball_on_beam_simulator.gpr``` refers to the Gnoga project file in a particular location. You need to replace that location with the location of Gnoga in your case. Alternatively, you can _install_ Gnoga and just use ```with "gnoga"``` at the start of the project file. See section _Installing Gnoga_ in the Gnoga User's Guide. 
 
@@ -122,7 +97,7 @@ The following example program moves the BB system to all objects defined by the 
 ```
 
 ## Is there a user manual?
-There is no user manual as such at the moment. Information on how to use the library is provided however in multiple code comments. In particular, spec files  contain detailed descriptions. The aim is that these comments are sufficient to understand how to work with the library, but you are welcome to contact me if they are not for you...
+There is no user manual as such at the moment. Information on how to use the library is provided however in multiple code comments. In particular, spec files contain detailed descriptions on how to use ```BB```, ```BB.Ideal```, ```BB.ADC```, and ```BB.GUI```. 
 
 ##  Contact
-Feel free to contact me by email (jorge@disca.upv.es) if you need help with this library, or you want to drop a comment or suggestion.
+Feel free to contact me by email (jorge@disca.upv.es) if you need help with this library, or if you want to drop a comment or suggestion.

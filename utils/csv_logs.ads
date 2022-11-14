@@ -29,7 +29,7 @@ package CSV_Logs is
    --
    --  For example, the code:
    --  
-   --        Open_Log_Session (File_Name => "kk.csv");
+   --        Open_Log_Session (File_Name => "data.csv");
    --        Log_Text ("Data_1, Data_2, Data_3");
    --        Log_Data (( 0.0,  0.0,  0.0));
    --        Log_Data ((-1.0, -1.0, -1.0));
