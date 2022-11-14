@@ -44,9 +44,9 @@ with Ada.Numerics.Elementary_Functions;  use Ada.Numerics.Elementary_Functions;
 
 package body BB.ADC is
 
-   --  The following procedures just call the implementation in package
-   --  Ball_On_Beam_Simulator. Ball_On_Beam_ADC only modifies the interface
-   --  with the position sensor, emulating an A/D converter
+   --  The following procedures just call the implementation in package BB
+   --  BB.ADC only modifies the interface with the position sensor, emulating
+   --  an A/D converter
    procedure Set_Beam_Angle (Inclination : Angle) renames
      BB.Set_Beam_Angle;
 

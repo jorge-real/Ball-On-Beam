@@ -1,6 +1,6 @@
-
-with "/Users/jorge/opt/gnoga/src/gnoga.gpr";
---  Use location of YOUR gnoga.gpr project file
+--  with "gnoga";   --  If Gnoga was installed with make
+  with "../gnoga/src/gnoga.gpr";
+--  Use the location of YOUR gnoga.gpr project file
 
 library project Ball_On_Beam_Simulator is
 

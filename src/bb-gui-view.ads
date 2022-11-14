@@ -49,6 +49,6 @@ package BB.GUI.View is
    procedure Create
      (View   : in out Default_View_Type;
       Parent : in out Gnoga.Gui.Base.Base_Type'Class;
-      ID     : in     String  := "");     
+      ID     : in     Gnoga.String  := "");     
    
 end BB.GUI.View;

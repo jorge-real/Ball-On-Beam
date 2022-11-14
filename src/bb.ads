@@ -45,7 +45,7 @@ package BB is
    --  Maximum and minimum position of ball on beam, in mm.
 
    subtype Position is Float range Min_Position .. Max_Position;
-   --  At the beam center, Position = 0.0. Position grows rightwards.
+   --  At the beam centre, Position = 0.0. Position grows rightwards.
    --  The position range is symmetrical around 0.0 mm.
 
    type Solar_System_Object is (Mercury, Venus, Earth, Moon, Mars,

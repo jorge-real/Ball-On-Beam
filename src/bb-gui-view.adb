@@ -26,8 +26,9 @@ package body BB.GUI.View is
    procedure Create
      (View   : in out Default_View_Type;
       Parent : in out Gnoga.Gui.Base.Base_Type'Class;
-      ID     : in     String  := "")
+      ID     : in     Gnoga.String  := "")
    is
+
       use Gnoga.Gui.View.Grid;
       use Gnoga.Gui.Element.Canvas.Context_2D;
    begin

@@ -38,7 +38,7 @@ package BB.ADC is
    --                                                                        --
    --  An analog position sensor is connected to this 12-bit ADC. The range  --
    --  of conversion is such that 0 corresponds to Min_Position and 4095 to  --
-   --  Max_Position (both declared in Ball_On_Beam_Simulator - spec).        --
+   --  Max_Position (both declared in BB - spec).                            --
    --                                                                        --
    --  There are two registers in the ADC adapter: Control Register (CR) and --
    --  Data Register (DR). Both are 16-bit wide. CR is read-only, DR is R/W. --
@@ -49,31 +49,31 @@ package BB.ADC is
    --      which a user program may attach a library-level, parameterless    --
    --      handling procedure.                                               --
    --    bit 0 (TRG): "trigger conversion" bit. When set, it triggers a new  --
-   --      A/D conversion. The end of conversion is reflected in bit EOC of  --
-   --      the ADC, besides causing the simulated interrupt when IE is set.  --
+   --      A/D conversion. The end of conversion is reflected in bit EOC     --
+   --      (in DR), and causes the simulated interrupt when IE is set.       --
    --                                                                        --
    --  The simulated DR uses:                                                --
-   --    bits 0..11 (ADC_Count): to store 12-bit conversions.                --
+   --    bits 0..11 (ADC_Count): to store the last 12-bit conversion.        --
    --    bit 15 (EOC): to signal end of conversions. This bit is set upon    --
    --       completion of an A/D conversion. EOC is reset every time the TRG --
    --       bit in the CR is set.                                            --
    --                                                                        --
    ----------------------------------------------------------------------------
 
-   --  Type of values written to the CR or read from the DR
    type ADC_Register is mod 2 ** 16
      with Size => 16;
+   --  Type of values written to the CR or read from the DR
 
-   --  Write a value to the Control Register
    procedure Write_CR (Value : ADC_Register);
+   --  Write a value to the Control Register
 
-   --  Read the Data Register
    function Read_DR return ADC_Register;
+   --  Read the Data Register
 
-   --  A user handler is a parameterless procedure
    type ADC_Handler_Access is access procedure;
+   --  A user handler is a parameterless procedure
 
-   --  Attach a user handler for ADC end-of-conversion interrupts
    procedure Attach_ADC_Handler (Handler : ADC_Handler_Access);
+   --  Attach a user handler for ADC end-of-conversion interrupts
 
 end BB.ADC;

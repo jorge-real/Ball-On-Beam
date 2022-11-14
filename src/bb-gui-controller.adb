@@ -17,13 +17,16 @@
 --  the original file, if any.                            --
 ------------------------------------------------------------
 
-with BB.GUI.View;
-use BB.GUI.View;
+--  Last changes: 11/11/22
+
+with BB.GUI.View; use BB.GUI.View;
 
 with Gnoga.Gui.Base;
 with Gnoga.Gui.Element.Canvas.Context_2D;
 with Gnoga.Application.Singleton;
 with Gnoga.Types;
+
+with Gnoga;
 
 with System;
 with Ada.Numerics.Elementary_Functions;
@@ -31,11 +34,12 @@ with Ada.Numerics.Elementary_Functions;
 with Ada.Real_Time;  use Ada.Real_Time;
 with Ada.Synchronous_Task_Control; use Ada.Synchronous_Task_Control;
 
+with Ada.Exceptions;
+
 package body BB.GUI.Controller is
 
-   View : BB.GUI.View.Default_View_Access :=
-     new BB.GUI.View.Default_View_Type;
-   
+   View : BB.GUI.View.Default_View_Access := new BB.GUI.View.Default_View_Type;
+      
    Simulation_Running : Boolean := True;
    Updater_Terminated : Boolean := False;
    
@@ -44,7 +48,7 @@ package body BB.GUI.Controller is
       --  GUI refresh period
    Updater_Period : constant Duration := 0.1;
    
-   --  Declaration of procedure in charge of updating the GUI
+   --  Declaration of procedure in charge of updating the GUI view
    procedure Update_Animation
      (Inclination : Angle;
       Ball_Pos    : Position;
@@ -67,15 +71,6 @@ package body BB.GUI.Controller is
    procedure On_Pause (Object : in out Gnoga.Gui.Base.Base_Type'Class) is
    begin
       Paused := not Paused;
-      if Paused then
-         null; --  release updater task in controller
-         --  View.Pause_Button.Property (Name  => ,
-                                     --  Value => "Unpause plot");
-      else
-         null; --  pause updater task
-         --  View.Pause_Button.Property (Name  => ,
-                                     --  Value => "Pause plot");
-      end if;
    end On_Pause;
    
    --  Updater - Task in charge of refreshing the GUI window. 
@@ -110,7 +105,6 @@ package body BB.GUI.Controller is
    y0  : constant := Float (y0c);
    
    --  Rectangles that cover the Animation and Status areas
-
    Cover_Animated_BB : constant Gnoga.Types.Rectangle_Type := 
      (X => 20, Y =>  20, Width => Canvas_X_Size - 40,
       Height => Canvas_Y_Size - 40);
@@ -119,7 +113,7 @@ package body BB.GUI.Controller is
       Height => Canvas_Y_Size - 50);   
    
    --  Background of the animation area (rectangle, beam pier, and labels)
-   Anim_Background : Gnoga.Gui.Element.Canvas.Context_2D.Image_Data_Type;
+   --  Anim_Background : Gnoga.Gui.Element.Canvas.Context_2D.Image_Data_Type;
    
    --  Background of the plot area (axis marks, labels, and grid)
    Plot_Background : Gnoga.Gui.Element.Canvas.Context_2D.Image_Data_Type;
@@ -128,7 +122,7 @@ package body BB.GUI.Controller is
    --  stoppers at both ends) and the beam length
    X_Beam_Scaling : constant Float := 340.0 / (Max_Position - Min_Position);
    
-   --  Declaratons for the graph view
+   --  Declarations for the graph view
    --  Vertical axis: ball position in millimeters
    Y_Min_Pos  : constant Float := Position'First;
    Y_Max_Pos  : constant Float := Position'Last;
@@ -142,20 +136,20 @@ package body BB.GUI.Controller is
    --  The graph range will be [Min_Position - Over .. Max_Postion + Over]
    Over : constant := 10.0;   
    
+   --  Pixel/mm ratio
    Y_Plot_Scaling : constant := 
      (Float (Canvas_Y_Size) - 50.0) / (Y_Max_Pos - Y_Min_Pos + (2.0 * Over));
-   --  Pixel / mm
    
+   -- Pixel/s ratio
    X_Plot_Scaling : constant := 
      (Float (Canvas_X_Size) - 45.0) / (X_Max_Time - X_Min_Time);
-   -- Pixel / s
    
    --  Number of points that will be plotted
    List_Length : constant :=  
      Integer ((X_Max_Time - X_Min_Time) / Updater_Period);
    
    --  Nr of pixels in X between two consecutive updater samples. Keep it Float
-   --  and use as an integer later, when plotting, to avoid cummulative error
+   --  and use as an integer later when plotting to avoid excessive rounding
    Delta_X : constant Float := X_Plot_Scaling * Float (Updater_Period);
    
    type Position_Plot is array (1..List_Length) of Position;
@@ -182,6 +176,15 @@ package body BB.GUI.Controller is
    --  Updates the ball and beam animation. 
    --  If plot refresh is not paused, it also updates the plot
    
+   --  First, some auxiliary declarations that need be global      
+   --  Values of previous parameters, to delete previous ball and beam by 
+   --     means of overdrawing them in background colour.
+   Last_Inclination : Angle    := -1.0;
+   Last_Ball_Pos    : Position := -1.0;
+   Last_Target_Pos  : Position := -1.0;
+   Last_Planet      : Solar_System_Object := Current_Planet;
+   
+   --  Second, the animation procedure
    procedure Update_Animation 
      (Inclination : Angle;
       Ball_Pos    : Position;
@@ -189,86 +192,131 @@ package body BB.GUI.Controller is
       
       use Ada.Numerics.Elementary_Functions;
       use Ada.Numerics;
+      use all type Gnoga.String;
+      use Gnoga;
       
       --  Auxiliaries for printing the lower status line
+      
       --  Scaled angle to extract two decimals
       Aux_Angle : constant Integer := Integer (Inclination * 100.0);
       --  String that contains the integer part of Angle
-      Angle_Int : constant String  := Integer'Image (Aux_Angle  /  100);
+      Angle_Int : constant Gnoga.String  := Gnoga.Image (Aux_Angle  /  100) & ".";
       --  String that contains the decimal part of Angle, with a leading space
-      Angle_Dec : constant String  := Integer'Image (Aux_Angle mod 100);
+      Angle_Dec : constant Gnoga.String  := Gnoga.Image (Aux_Angle mod 100) & " deg";
       --  String that represents the position in mm
-      Pos_Str   : constant String  := Integer'Image (Integer (Ball_Pos));
+      Pos_Str   : constant Gnoga.String  := Gnoga.Image (Integer (Ball_Pos));
       --  String that represents the target position in mm
-      Tgt_Str   : constant String  := Integer'Image (Integer (Target_Pos));
+      Tgt_Str   : constant Gnoga.String  := Gnoga.Image (Integer (Target_Pos));
+      --  Auxiliary string for current planet
+      Curr_Planet_Str : constant Gnoga.String := From_ASCII (Current_Planet'Image);
       
       --  Auxiliaries for drawing
+      
       --  Angle in radians for trigonometrical functions
       Ang : constant Float := (Inclination * Pi) / 180.0;
+      Last_Ang : constant Float := (Last_Inclination * Pi) /180.0;
       
       Sin_A : constant Float := Sin (-Ang);
       Cos_A : constant Float := Cos (-Ang);
+      Last_Sin_A : constant Float := Sin (-Last_Ang);
+      Last_Cos_A : constant Float := Cos (-Last_Ang);
+      
       
       --  Coordinates of Ball center at Ball_Pos when Angle = 0.0
       X_Pos_0: constant Float := x0 + Ball_Pos * X_Beam_Scaling;
       Y_Pos_0: constant Float := y0 - 20.0;
+      Last_X_Pos_0: constant Float := x0 + Last_Ball_Pos * X_Beam_Scaling;
+      Last_Y_Pos_0: constant Float := y0 - 20.0;
       
       --  Coordinates of top of target marker when Angle = 0.0
       X_Tgt_0: constant Float := x0 + Target_Pos * X_Beam_Scaling;
       Y_Tgt_0: constant Float := y0 - 10.0;
+      Last_X_Tgt_0: constant Float := x0 + Last_Target_Pos * X_Beam_Scaling;
+      Last_Y_Tgt_0: constant Float := y0 - 10.0;
 
-      
       --  Rotation transform functions:
       --
       --  x' = x0 - (x - x0)*cos(Ang) - (y - y0)*sin(Ang)
       --  y' = y0 + (x - x0)*sin(Ang) - (y - y0)*cos(Ang)
       --  
       --  where: (x0, y0) = pivot point (declared global constants)
-      --         (X, Y) = Coordinates of point to rotate when Angle = 0.0
+      --         (X, Y) = Coordinates of point to rotate if Angle was 0.0
       --
-      --  With sign variations depending on which object is rotated, the
+      --  With signs adapted to the object being rotated, the
       --  beam, the ball, or the target marker.
       
       function X_Beam (X, Y: Float) return Integer is
         (Integer (x0 - (X - x0) * Cos_A - (Y - y0) * Sin_A));
       function Y_Beam (X, Y: Float) return Integer is
         (Integer (y0 - (X - x0) * Sin_A + (Y - y0) * Cos_A));
+      function Last_X_Beam (X, Y: Float) return Integer is
+        (Integer (x0 - (X - x0) * Last_Cos_A - (Y - y0) * Last_Sin_A));
+      function Last_Y_Beam (X, Y: Float) return Integer is
+        (Integer (y0 - (X - x0) * Last_Sin_A + (Y - y0) * Last_Cos_A));
       
       function X_Ball (X, Y: Float) return Integer is
         (Integer (x0 + (X - x0) * Cos_A - (Y - y0) * Sin_A));
       function Y_Ball (X, Y: Float) return Integer is
         (Integer (y0 + (X - x0) * Sin_A + (Y - y0) * Cos_A));
+      function Last_X_Ball (X, Y: Float) return Integer is
+        (Integer (x0 + (X - x0) * Last_Cos_A - (Y - y0) * Last_Sin_A));
+      function Last_Y_Ball (X, Y: Float) return Integer is
+        (Integer (y0 + (X - x0) * Last_Sin_A + (Y - y0) * Last_Cos_A));
       
       --  Same transform for target position marker as for the ball
       function X_Tgt (X, Y: Float) return Integer renames X_Ball;
-      function Y_Tgt (X, Y: Float) return Integer renames Y_Ball;
-      
+      function Y_Tgt (X, Y: Float) return Integer renames Y_Ball;      
+      function Last_X_Tgt (X, Y: Float) return Integer renames Last_X_Ball;
+      function Last_Y_Tgt (X, Y: Float) return Integer renames Last_Y_Ball;      
+
       X_Plot_Offset : Integer;
             
    begin
-      ----------------------------------
-      --  Redraw the animation panel  --
-      ----------------------------------
-
-      --  Put background image of animation panel
-      View.BB_Animation.Put_Image_Data (Anim_Background, 0, 0);
-      
+      ------------------------------
+      --  Redraw animation panel  --
+      ------------------------------
+            
       --  Update status info
-      View.BB_Animation.Fill_Color ("Black");
-      --  Print angle value
-      View.BB_Animation.Fill_Text 
-        (Angle_Int & "." & 
-           Angle_Dec (Angle_Dec'First + 1 .. Angle_Dec'Last) & 
-           " deg", 150 + Angle_Text_X_Offset, Canvas_Y_Size - 5);
-      --  Print ball position value
-      View.BB_Animation.Fill_Text 
-        (Pos_Str & 
-           " mm", 270 + Pos_Text_X_Offset, Canvas_Y_Size - 5);
-      --  Print SSO name
---           View.BB_Animation.Fill_Text
---             ("        ", (Canvas_X_Size / 2) - 20, 14);
-      View.BB_Animation.Fill_Text
-        (Current_Planet'Image, (Canvas_X_Size / 2) - 20, 14);
+      --  Inclination angle value
+      if Inclination /= Last_Inclination then
+         --  Clear previous Angle value
+         View.BB_Animation.Fill_Color ("white");
+         View.BB_Animation.Fill_Rectangle ((150 + Angle_Text_X_Offset,
+                                           Canvas_Y_Size - 2,
+                                           80, -12));
+         --  Print angle value
+         View.BB_Animation.Fill_Color ("Black");
+         View.BB_Animation.Fill_Text 
+           (Angle_Int & Left_Trim (Angle_Dec), 
+            150 + Angle_Text_X_Offset, Canvas_Y_Size - 5);
+      end if;
+
+      --  Ball position value
+      if Ball_Pos /= Last_Ball_Pos then
+         -- Clear previous Position value
+         View.BB_Animation.Fill_Color ("white");
+         View.BB_Animation.Fill_Rectangle ((270 + Pos_Text_X_Offset,
+                                           Canvas_Y_Size - 2,
+                                           90, -12));
+         -- Print Position value
+         View.BB_Animation.Fill_Color ("Black");
+         View.BB_Animation.Fill_Text 
+           (Pos_Str & " mm", 270 + Pos_Text_X_Offset, Canvas_Y_Size - 5);
+      end if;
+      
+      --  Current planet name
+      if Last_Planet /= Current_Planet then
+         Last_Planet := Current_Planet;
+         --  Clear previous planet name
+         View.BB_Animation.Fill_Color ("white");
+         View.BB_Animation.Fill_Rectangle (((Canvas_X_Size / 2) - 22, 
+                                           18,
+                                           90, -12));         
+         -- Print planet name
+         View.BB_Animation.Fill_Color ("Black");
+         View.BB_Animation.Fill_Text
+           (Curr_Planet_Str, (Canvas_X_Size / 2) - 20, 14);
+      end if;
             
       --  Draw beam with angle given by Inclination
       --
@@ -277,71 +325,124 @@ package body BB.GUI.Controller is
       --    For example, OTop opposes -OTop, with respect to symmetry axis 
       --    defined by the orthogonal to the beam that crosses the pivot point.
       --
-      --   -ITop                   |Symmetry              OTop
-      --     ^                     .axis                   ^
-      --  -OTop                    |                   ITop
-      --   ^_   -Mid     Negative  .   Positive     Mid  ^_
-      --   | | /        positions  |   positions       \ | |
+      --  -OTop                    | Symmetry              OTop
+      --   ^                       . axis                  ^
+      --    -ITop                  |                   ITop
+      --    _^ -Mid     Negative   .   Positive     Mid  ^_
+      --   | | /       positions   |   positions       \ | |
       --   | |/____________________.____________________\| |
       --   |_______________________+_______________________| 
       --   ^ -OBot                 ^                       ^ OBot
       --                     Pivot point (x0, y0)
       
-      View.BB_Animation.Fill_Color ("Maroon");
-      View.BB_Animation.Begin_Path;
-      View.BB_Animation.Move_To (X_Beam (x0 - 180.0, y0), 
-                                 Y_Beam (x0 - 180.0, y0));         -- a  -OBot
-      View.BB_Animation.Line_To (X_Beam (x0 + 180.0, y0), 
-                                 Y_Beam (x0 + 180.0, y0));         -- b   OBot
-      View.BB_Animation.Line_To (X_Beam (x0 + 180.0, y0 - 25.0), 
-                                 Y_Beam (x0 + 180.0, y0 - 25.0));  -- c   OTop
-      View.BB_Animation.Line_To (X_Beam (x0 + 178.0, y0 - 25.0), 
-                                 Y_Beam (x0 + 178.0, y0 - 25.0));  -- d   ITop
-      View.BB_Animation.Line_To (X_Beam (x0 + 178.0, y0 - 10.0), 
-                                 Y_Beam (x0 + 178.0, y0 - 10.0));  -- e    Mid
-      View.BB_Animation.Line_To (X_Beam (x0 - 178.0, y0 - 10.0), 
-                                 Y_Beam (x0 - 178.0, y0 - 10.0));  -- f   -Mid
-      View.BB_Animation.Line_To (X_Beam (x0 - 178.0, y0 - 25.0), 
-                                 Y_Beam (x0 - 178.0, y0 - 25.0));  -- g  -ITop
-      View.BB_Animation.Line_To (X_Beam (x0 - 180.0, y0 - 25.0), 
-                                 Y_Beam (x0 - 180.0, y0 - 25.0));  -- h  -OTop
-      View.BB_Animation.Close_Path;
-      View.BB_Animation.Fill;
+      if Ball_Pos /= Last_Ball_Pos or else 
+        Inclination /= Last_Inclination or else
+        Target_Pos /= Last_Target_Pos
+      then
+         --  First, overwrite last BB frame in background colour to delete it.
+         --    The ball and the beam are slightly scaled up to fully delete the
+         --    last frame.
+         
+         View.BB_Animation.Fill_Color ("Linen");
+         View.BB_Animation.Stroke_Color ("Linen");
+         View.BB_Animation.Line_Width (2);
+         View.BB_Animation.Begin_Path;
+         View.BB_Animation.Move_To (Last_X_Beam (x0 - 181.0, y0 + 1.0), 
+                                    Last_Y_Beam (x0 - 181.0, y0 + 1.0));   -- -OBot
+         View.BB_Animation.Line_To (Last_X_Beam (x0 + 181.0, y0 + 1.0), 
+                                    Last_Y_Beam (x0 + 181.0, y0 + 1.0));   --  OBot
+         View.BB_Animation.Line_To (Last_X_Beam (x0 + 181.0, y0 - 26.0), 
+                                    Last_Y_Beam (x0 + 181.0, y0 - 26.0));  --  OTop
+         View.BB_Animation.Line_To (Last_X_Beam (x0 + 177.0, y0 - 26.0), 
+                                    Last_Y_Beam (x0 + 177.0, y0 - 26.0));  --  ITop
+         View.BB_Animation.Line_To (Last_X_Beam (x0 + 177.0, y0 - 11.0), 
+                                    Last_Y_Beam (x0 + 177.0, y0 - 11.0));  --   Mid
+         View.BB_Animation.Line_To (Last_X_Beam (x0 - 177.0, y0 - 11.0), 
+                                    Last_Y_Beam (x0 - 177.0, y0 - 11.0));  --  -Mid
+         View.BB_Animation.Line_To (Last_X_Beam (x0 - 177.0, y0 - 26.0), 
+                                    Last_Y_Beam (x0 - 177.0, y0 - 26.0));  -- -ITop
+         View.BB_Animation.Line_To (Last_X_Beam (x0 - 181.0, y0 - 26.0), 
+                                    Last_Y_Beam (x0 - 181.0, y0 - 26.0));  -- -OTop
+         View.BB_Animation.Close_Path;
+         View.BB_Animation.Stroke;
+         View.BB_Animation.Fill;         
+         
+         --  Now delete the ball
+         View.BB_Animation.Fill_Color ("Linen");
+         View.BB_Animation.Begin_Path;      
+         View.BB_Animation.Arc_Degrees (Last_X_Ball (Last_X_Pos_0, Last_Y_Pos_0),
+                                        Last_Y_Ball (Last_X_Pos_0, Last_Y_Pos_0),
+                                        11, 0.0, 360.0);
+         View.BB_Animation.Close_Path;
+         View.BB_Animation.Fill;
+         
+         -- Second, draw the new frame 
+         View.BB_Animation.Fill_Color ("Maroon");
+         --  View.BB_Animation.Stroke_Color ("Maroon");
+         --View.BB_Animation.Line_Width (2);
+         View.BB_Animation.Begin_Path;
+         View.BB_Animation.Move_To (X_Beam (x0 - 180.0, y0), 
+                                    Y_Beam (x0 - 180.0, y0));         -- a  -OBot
+         View.BB_Animation.Line_To (X_Beam (x0 + 180.0, y0), 
+                                    Y_Beam (x0 + 180.0, y0));         -- b   OBot
+         View.BB_Animation.Line_To (X_Beam (x0 + 180.0, y0 - 25.0), 
+                                    Y_Beam (x0 + 180.0, y0 - 25.0));  -- c   OTop
+         View.BB_Animation.Line_To (X_Beam (x0 + 178.0, y0 - 25.0), 
+                                    Y_Beam (x0 + 178.0, y0 - 25.0));  -- d   ITop
+         View.BB_Animation.Line_To (X_Beam (x0 + 178.0, y0 - 10.0), 
+                                    Y_Beam (x0 + 178.0, y0 - 10.0));  -- e    Mid
+         View.BB_Animation.Line_To (X_Beam (x0 - 178.0, y0 - 10.0), 
+                                    Y_Beam (x0 - 178.0, y0 - 10.0));  -- f   -Mid
+         View.BB_Animation.Line_To (X_Beam (x0 - 178.0, y0 - 25.0), 
+                                    Y_Beam (x0 - 178.0, y0 - 25.0));  -- g  -ITop
+         View.BB_Animation.Line_To (X_Beam (x0 - 180.0, y0 - 25.0), 
+                                    Y_Beam (x0 - 180.0, y0 - 25.0));  -- h  -OTop
+         View.BB_Animation.Close_Path;
+         --View.BB_Animation.Stroke;
+         View.BB_Animation.Fill;         
+         
+         --  Draw a target marker on the beam
+         View.BB_Animation.Stroke_Color ("peachpuff");
+         View.BB_Animation.Line_Width (3);
+         View.BB_Animation.Begin_Path;
+         View.BB_Animation.Move_To (X_Tgt (X_Tgt_0, Y_Tgt_0), 
+                                    Y_Tgt (X_Tgt_0, Y_Tgt_0));
       
-      --  Draw a target marker on the beam
-      View.BB_Animation.Stroke_Color ("peachpuff");
-      View.BB_Animation.Line_Width (3);
-      View.BB_Animation.Begin_Path;
-      View.BB_Animation.Move_To (X_Tgt (X_Tgt_0, Y_Tgt_0), 
-                                 Y_Tgt (X_Tgt_0, Y_Tgt_0));
+         View.BB_Animation.Line_To (X_Tgt (X_Tgt_0, y0), 
+                                    Y_Tgt (X_Tgt_0, y0));
+         View.BB_Animation.Stroke;
       
-      View.BB_Animation.Line_To (X_Tgt (X_Tgt_0, y0), 
-                                 Y_Tgt (X_Tgt_0, y0));
-      View.BB_Animation.Stroke;
+         --  Draw ball on the beam at position given by Ball_Pos
+         View.BB_Animation.Fill_Color ("Olive");
+         --  View.BB_Animation.Stroke_Color ("Olive");
+         View.BB_Animation.Line_Width (1);
+         View.BB_Animation.Begin_Path;      
+         View.BB_Animation.Arc_Degrees (X_Ball (X_Pos_0, Y_Pos_0),
+                                        Y_Ball (X_Pos_0, Y_Pos_0),
+                                        10, 0.0, 360.0);
+         View.BB_Animation.Close_Path;
+         --  View.BB_Animation.Stroke;
+         View.BB_Animation.Fill;
       
-      --  Draw ball on the beam at position given by Ball_Pos
-      View.BB_Animation.Fill_Color ("Olive");
-      View.BB_Animation.Begin_Path;      
-      View.BB_Animation.Arc_Degrees (X_Ball (X_Pos_0, Y_Pos_0),
-                                     Y_Ball (X_Pos_0, Y_Pos_0),
-                                     10, 0.0, 360.0);
-      View.BB_Animation.Close_Path;
-      View.BB_Animation.Fill;
-      
-      --  Reflection effect on ball
-      View.BB_Animation.Fill_Color ("White");
-      View.BB_Animation.Begin_Path;      
-      View.BB_Animation.Arc_Degrees (X_Ball (X_Pos_0, Y_Pos_0) - 3,
-                                     Y_Ball (X_Pos_0, Y_Pos_0) - 3,
-                                     2, 0.0, 360.0);
-      View.BB_Animation.Close_Path;
-      View.BB_Animation.Fill;
-
-      
+         --  Reflection effect on ball
+         View.BB_Animation.Fill_Color ("White");
+         View.BB_Animation.Begin_Path;
+         View.BB_Animation.Arc_Degrees (X_Ball (X_Pos_0, Y_Pos_0) - 3,
+                                        Y_Ball (X_Pos_0, Y_Pos_0) - 3,
+                                        2, 0.0, 360.0);
+         View.BB_Animation.Close_Path;
+         View.BB_Animation.Fill;
+         
+         --  Update Last_* values for next call
+         Last_Inclination := Inclination;
+         Last_Ball_Pos    := Ball_Pos;
+         --  Last_Target_Pos  := Target_Pos;
+      end if;
+         
       ------------------------------
-      --  Redraw the graph panel  --
+      --  Redraw the plot panel  --
       ------------------------------
-      --  The graph panel is only refreshed if plotting is not paused
+      --  The plot panel is only refreshed if plotting is not paused
       if not Paused then
          --  Put background image (axes, grid and "Target = " label)
          View.BB_Pos_Graph.Put_Image_Data (Plot_Background, 0, 0);
@@ -356,18 +457,17 @@ package body BB.GUI.Controller is
             Target_Plot (1..N_Plot_Points - 1) := Target_Plot (2..N_Plot_Points);
          end if;
          Pos_Plot    (N_Plot_Points) := Ball_Pos;
-         Target_Plot (N_Plot_Points) := Current_Target_Pos;
+         Target_Plot (N_Plot_Points) := Target_Pos;
       
          --  Plot Position graph
          --  Status line. Print target position
+         Last_Target_Pos  := Target_Pos;
          View.BB_Pos_Graph.Fill_Color ("Black");
          View.BB_Pos_Graph.Fill_Text 
-           ((if Tgt_Str (Tgt_Str'First) = '-' then 
-               Tgt_Str 
-            else 
-               Tgt_Str (Tgt_Str'First + 1 .. Tgt_Str'Last)) & 
-              " mm", 200 + Target_Text_X_Offset, Canvas_Y_Size - 5);
-      
+           ((if Target_Pos < 0.0 then Tgt_Str else Left_Trim (Tgt_Str)) & " mm", 
+            200 + Target_Text_X_Offset, 
+            Canvas_Y_Size - 5);
+
          X_Plot_Offset := 0;
          View.BB_Pos_Graph.Stroke_Color ("Blue");
          View.BB_Pos_Graph.Begin_Path;
@@ -403,7 +503,7 @@ package body BB.GUI.Controller is
          end loop;
          View.BB_Pos_Graph.Stroke;
       end if;
-
+      
    end Update_Animation;
    
    ----------------------------
@@ -460,7 +560,7 @@ package body BB.GUI.Controller is
          Val_Label := Integer (Mark);
          View.BB_Pos_Graph.Fill_Color ("Black");
          View.BB_Pos_Graph.Fill_Text 
-           (Val_Label'Image, 
+           (Gnoga.Image(Val_Label), 
             Y_Start_X - (if Val_Label >= 100 or Val_Label <= -100 then 28
               elsif Val_Label >= 10 or Val_Label <= -10 then 22
               else 16),
@@ -495,10 +595,14 @@ package body BB.GUI.Controller is
       
       --  Write status text at bottom of graph
       View.BB_Pos_Graph.Fill_Color ("Black");
-      View.BB_Pos_Graph.Fill_Text ("Target = ", 200, Canvas_Y_Size - 5);
+
+      View.BB_Pos_Graph.Fill_Text ("Target = ", 
+                                   200 + Target_Text_X_Offset, 
+                                   Canvas_Y_Size - 5);
+
       Target_Text_X_Offset := Integer 
         (View.BB_Pos_Graph.Measure_Text_Width ("Target = "));
-      
+
       --  Write units next to both axes
       View.BB_Pos_Graph.Fill_Text ("(mm)", 3, Canvas_Y_Size - 10);
       View.BB_Pos_Graph.Fill_Text ("(1 sec/div)", 
@@ -508,22 +612,23 @@ package body BB.GUI.Controller is
       --  Copy background to image Plot_Background. The plot background can then
       --    be redrawn with Put_Image_Data, more efficient than redrawing from
       --    scratch every time the plot is refreshed
-      View.BB_Pos_Graph.Get_Image_Data 
+      View.BB_Pos_Graph.Get_Image_Data
         (Image_Data => Plot_Background,
          Left       => 0,
          Top        => 0,
          Width      => Canvas_X_Size,
          Height     => Canvas_Y_Size);
+      
    end Draw_Plot_Background;
    
    ---------------------------------
    --  Draw_Animation_Background  --
    ---------------------------------
    --
-   --  Draws all background elements of the animation area and saves the image 
-   --    to Anim_Background for convenient use from Update_Animation
+   --  Draw all background elements of the animation area 
    --   
    procedure Draw_Animation_Background is
+      use all type Gnoga.String;
    begin
       --  Draw background rectangle
       View.BB_Animation.Fill_Color ("Linen");
@@ -548,21 +653,17 @@ package body BB.GUI.Controller is
         ("Angle = ", 150, Canvas_Y_Size - 5);
             View.BB_Animation.Fill_Text 
         ("Position = ", 270, Canvas_Y_Size - 5);
-
-      --  Copy background to Anim_Background image
-      View.BB_Animation.Get_Image_Data 
-        (Image_Data => Anim_Background,
-         Left       => 0,
-         Top        => 0,
-         Width      => Canvas_X_Size,
-         Height     => Canvas_Y_Size);
+      -- Print name of current planet
+      View.BB_Animation.Fill_Color ("Black");
+      View.BB_Animation.Fill_Text
+           (From_ASCII (Last_Planet'Image), (Canvas_X_Size / 2) - 20, 14);
       
       --  Measure X offsets for Angle and Pos values      
       Angle_Text_X_Offset := 
         Integer (View.BB_Animation.Measure_Text_Width ("Angle = "));
       Pos_Text_X_Offset := 
         Integer (View.BB_Animation.Measure_Text_Width ("Position = "));
-      
+
    end Draw_Animation_Background;
    
    -----------------
@@ -571,16 +672,38 @@ package body BB.GUI.Controller is
    
    procedure Create_GUI
      (Main_Window : in out Gnoga.Gui.Window.Window_Type'Class) is
+      --  use all type Gnoga.String;
+
+      --  Ms1 : Gnoga.String := "_AAAA_AAAA_";
+      
    begin
       View.Dynamic;
+                  
       View.Create (Parent => Main_Window);
+            
       View.Quit_Button.On_Click_Handler (On_Quit'Access);
+            
       View.Pause_Button.On_Click_Handler (On_Pause'Access);
+            
       --  Draw plot and animation background images and save them for future use
       Draw_Plot_Background;
       Draw_Animation_Background;
+      Update_Animation (0.0, 0.0, 0.0);
+            
       --  Signal the updater task that it can start using the GUI
       Set_True (GUI_Is_Usable);
+            
+   exception
+      when E : others =>
+         declare
+            use all type Gnoga.String;
+
+            Msg : Gnoga.String := "Exception caught during BB.GUI.Controller.Create_GUI:" &
+                 From_ASCII (Ada.Exceptions.Exception_Name (E)) & " - " &
+                 From_ASCII (Ada.Exceptions.Exception_Message (E));
+         begin
+            Gnoga.Log (Msg, E);
+         end;
    end Create_GUI;
    
 end BB.GUI.Controller;
