@@ -48,7 +48,7 @@ However, if you want ADC conversions at the intended delay of 2 ms, you need to 
 How to recompile your runtime depends on the toolchain and version you are using. There are project files for that in the GNAT Community Edition versions.  For FSF distributions, see the [GCC installation instructions](https://gcc.gnu.org/install).
   
 ##  Dependencies
-The GUI packages depend on the [Gnoga](https://github.com/alire-project/gnoga) library version 2. As of today. the latest Gnoga version used by ```BB``` is 2.1a. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
+The GUI packages depend on the [Gnoga](https://github.com/alire-project/gnoga) library version 2. As of today, the latest Gnoga version used by ```BB``` is 2.1a. There are no other dependencies. Note that you can also use the simulator without the GUI, in which case it has no dependencies at all. 
 
 The project file ```ball_on_beam_simulator.gpr``` refers to the Gnoga project file in a particular location. You need to replace that location with the location of Gnoga in your case. Alternatively, you can _install_ Gnoga and just use ```with "gnoga"``` at the start of the project file. See section _Installing Gnoga_ in the Gnoga User's Guide. 
 
